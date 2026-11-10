@@ -1,0 +1,11 @@
+.env
+saida/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# notas pessoais de trabalho, fora do repositorio
+HANDOFF.md
+PLANO.md
+ROTEIRO-VIDEO.md

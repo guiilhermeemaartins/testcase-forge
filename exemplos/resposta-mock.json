@@ -1,0 +1,148 @@
+{
+  "requisito": "Solicitacao de alvara de funcionamento pelo portal do empreendedor",
+  "regras_identificadas": [
+    "A solicitacao so pode ser enviada por usuario autenticado com CNPJ ativo",
+    "CNPJ com situacao diferente de ativa bloqueia o envio e exibe 'CNPJ sem situacao ativa'",
+    "Anexo em formato diferente de PDF e rejeitado com 'Apenas arquivos PDF sao aceitos'",
+    "Anexo acima de 10 MB e rejeitado com 'Arquivo excede o limite de 10 MB'",
+    "O envio com sucesso gera protocolo no formato AAAA-NNNNNN exibido na confirmacao",
+    "A solicitacao enviada fica com situacao 'Em analise' na lista do usuario"
+  ],
+  "casos": [
+    {
+      "id": "CT-001",
+      "titulo": "Enviar solicitacao com CNPJ ativo e anexo PDF valido",
+      "tipo": "sucesso",
+      "prioridade": "alta",
+      "regra_coberta": "O envio com sucesso gera protocolo no formato AAAA-NNNNNN exibido na confirmacao",
+      "pre_condicoes": [
+        "Usuario autenticado",
+        "CNPJ com situacao ativa na base da Receita"
+      ],
+      "passos": [
+        {
+          "acao": "Acesse o formulario de solicitacao de alvara"
+        },
+        {
+          "acao": "Informe o CNPJ",
+          "dado": "11.222.333/0001-44 (ativo)"
+        },
+        {
+          "acao": "Informe o endereco do estabelecimento",
+          "dado": "Rua das Flores, 100"
+        },
+        {
+          "acao": "Selecione a atividade principal",
+          "dado": "CNAE 4712-1/00"
+        },
+        {
+          "acao": "Anexe o contrato social",
+          "dado": "contrato.pdf, 2 MB"
+        },
+        {
+          "acao": "Clique em Enviar solicitacao"
+        }
+      ],
+      "resultado_esperado": "A tela de confirmacao exibe o numero de protocolo no formato AAAA-NNNNNN, por exemplo 2026-000154"
+    },
+    {
+      "id": "CT-002",
+      "titulo": "Bloquear envio quando o CNPJ nao esta com situacao ativa",
+      "tipo": "falha",
+      "prioridade": "alta",
+      "regra_coberta": "CNPJ com situacao diferente de ativa bloqueia o envio e exibe 'CNPJ sem situacao ativa'",
+      "pre_condicoes": [
+        "Usuario autenticado",
+        "CNPJ com situacao baixada na base da Receita"
+      ],
+      "passos": [
+        {
+          "acao": "Informe o CNPJ",
+          "dado": "99.888.777/0001-11 (baixado)"
+        },
+        {
+          "acao": "Preencha os demais campos obrigatorios"
+        },
+        {
+          "acao": "Clique em Enviar solicitacao"
+        }
+      ],
+      "resultado_esperado": "O envio e bloqueado e o sistema exibe a mensagem 'CNPJ sem situacao ativa'; nenhum protocolo e gerado"
+    },
+    {
+      "id": "CT-003",
+      "titulo": "Rejeitar anexo em formato diferente de PDF",
+      "tipo": "falha",
+      "prioridade": "alta",
+      "regra_coberta": "Anexo em formato diferente de PDF e rejeitado com 'Apenas arquivos PDF sao aceitos'",
+      "pre_condicoes": [
+        "Usuario autenticado com CNPJ ativo"
+      ],
+      "passos": [
+        {
+          "acao": "Anexe o contrato social",
+          "dado": "contrato.docx, 1 MB"
+        },
+        {
+          "acao": "Clique em Enviar solicitacao"
+        }
+      ],
+      "resultado_esperado": "O sistema recusa o anexo e exibe a mensagem 'Apenas arquivos PDF sao aceitos'"
+    },
+    {
+      "id": "CT-004",
+      "titulo": "Rejeitar anexo PDF acima de 10 MB",
+      "tipo": "falha",
+      "prioridade": "media",
+      "regra_coberta": "Anexo acima de 10 MB e rejeitado com 'Arquivo excede o limite de 10 MB'",
+      "pre_condicoes": [
+        "Usuario autenticado com CNPJ ativo"
+      ],
+      "passos": [
+        {
+          "acao": "Anexe o contrato social",
+          "dado": "contrato.pdf, 12 MB"
+        },
+        {
+          "acao": "Clique em Enviar solicitacao"
+        }
+      ],
+      "resultado_esperado": "O sistema recusa o anexo e exibe a mensagem 'Arquivo excede o limite de 10 MB'"
+    },
+    {
+      "id": "CT-005",
+      "titulo": "Impedir acesso ao formulario sem autenticacao",
+      "tipo": "falha",
+      "prioridade": "alta",
+      "regra_coberta": "A solicitacao so pode ser enviada por usuario autenticado com CNPJ ativo",
+      "pre_condicoes": [
+        "Nenhuma sessao ativa no navegador"
+      ],
+      "passos": [
+        {
+          "acao": "Acesse a URL do formulario de solicitacao de alvara sem estar logado"
+        }
+      ],
+      "resultado_esperado": "O sistema redireciona para a tela de login e nao exibe o formulario de solicitacao"
+    },
+    {
+      "id": "CT-006",
+      "titulo": "Exibir solicitacao enviada com situacao Em analise",
+      "tipo": "alternativo",
+      "prioridade": "media",
+      "regra_coberta": "A solicitacao enviada fica com situacao 'Em analise' na lista do usuario",
+      "pre_condicoes": [
+        "Solicitacao do CT-001 enviada com sucesso"
+      ],
+      "passos": [
+        {
+          "acao": "Acesse a lista de solicitacoes do usuario"
+        },
+        {
+          "acao": "Localize a solicitacao pelo numero de protocolo gerado"
+        }
+      ],
+      "resultado_esperado": "A solicitacao aparece na lista com a situacao 'Em analise' e o protocolo identico ao exibido na confirmacao"
+    }
+  ]
+}

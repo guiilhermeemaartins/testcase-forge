@@ -7,10 +7,15 @@ regras abaixo sao codigo, roda igual toda vez e nao tem opiniao.
 Fecha em aprovado ou reprovado, como um ciclo de teste normal.
 """
 
+import importlib.util
+import pathlib
 import re
 import unicodedata
+from typing import Callable
 
 from .schema import SuiteDeTestes
+
+SEVERIDADES = ("bloqueio", "aviso")
 
 # Termos que tornam um resultado esperado inverificavel. Se o resultado diz
 # "funciona corretamente", nao da para dizer se passou ou falhou.
@@ -71,7 +76,40 @@ def _normaliza(s: str) -> str:
     return re.sub(r"[^a-z0-9 ]", "", s)
 
 
-def auditar(suite: SuiteDeTestes) -> Relatorio:
+# Uma regra extra tem o mesmo formato das regras de dentro: recebe a suite e
+# devolve os achados. Lista vazia quer dizer que a regra nao encontrou nada.
+Regra = Callable[[SuiteDeTestes], list[Achado]]
+
+
+def carregar_regras(caminho: str) -> list[Regra]:
+    """Carrega regras extras de um arquivo .py escrito por quem usa a ferramenta.
+
+    Vale como regra toda funcao do arquivo cujo nome comeca com ``regra_``.
+    Atencao: carregar o arquivo executa o codigo dele. So aponte para arquivo
+    que voce escreveu ou leu.
+    """
+    arquivo = pathlib.Path(caminho)
+    if not arquivo.is_file():
+        raise ValueError(f"arquivo de regras nao encontrado: {caminho}")
+    spec = importlib.util.spec_from_file_location(arquivo.stem, arquivo)
+    if spec is None or spec.loader is None:
+        raise ValueError(f"arquivo de regras precisa ser um .py: {caminho}")
+    modulo = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(modulo)
+    except Exception as e:
+        raise ValueError(f"erro ao carregar o arquivo de regras {caminho}: {e}") from e
+
+    # Ordem alfabetica: a mesma entrada produz sempre o mesmo relatorio.
+    regras = [
+        f for nome, f in sorted(vars(modulo).items()) if nome.startswith("regra_") and callable(f)
+    ]
+    if not regras:
+        raise ValueError(f"nenhuma funcao com nome comecando em regra_ no arquivo {caminho}")
+    return regras
+
+
+def auditar(suite: SuiteDeTestes, regras_extras: list[Regra] | None = None) -> Relatorio:
     achados: list[Achado] = []
 
     # 1. Cobertura: toda regra identificada precisa de pelo menos um caso.
@@ -144,5 +182,17 @@ def auditar(suite: SuiteDeTestes) -> Relatorio:
                         f"{c.id} passo {i} e curto demais para ser uma acao: {p.acao!r}",
                     )
                 )
+
+    # 8. Regras extras, de quem usa a ferramenta. Rodam depois das padrao e
+    # entram no mesmo relatorio. Regra que devolve algo que nao e um Achado
+    # quebra aqui, em vez de passar em silencio.
+    for regra in regras_extras or []:
+        for a in regra(suite):
+            if not isinstance(a, Achado) or a.severidade not in SEVERIDADES:
+                raise ValueError(
+                    f"a regra extra {regra.__name__} devolveu algo que nao e um Achado "
+                    f"com severidade {SEVERIDADES}: {a!r}"
+                )
+            achados.append(a)
 
     return Relatorio(achados)

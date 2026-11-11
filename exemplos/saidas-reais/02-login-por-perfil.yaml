@@ -1,0 +1,130 @@
+# Saida real, sem edicao manual. Entrada: exemplos/02-login-por-perfil.md
+# Modelo: gemini-3.6-flash | Gerado em: 2026-11-10 | Auditoria: aprovado
+requisito: Controle de acesso e visualização de módulos no sistema por perfil de usuário.
+regras_identificadas:
+- O login é feito com e-mail e senha.
+- Após três tentativas com senha incorreta, a conta é bloqueada por 15 minutos e exibe a mensagem "Conta
+  temporariamente bloqueada".
+- O perfil Operador vê somente o módulo Atendimento.
+- O perfil Supervisor vê os módulos Atendimento e Relatórios.
+- O perfil Administrador vê todos os módulos, incluindo Configurações.
+- Usuário inativo não consegue entrar e recebe a mensagem "Usuário inativo".
+- A sessão expira após 30 minutos sem interação e redireciona para a tela de login.
+casos:
+- id: CT-001
+  titulo: Realizar login com e-mail e senha válidos
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: O login é feito com e-mail e senha.
+  pre_condicoes:
+  - Usuário possui cadastro ativo no sistema.
+  passos:
+  - acao: Acesse a tela de login
+    dado: URL do sistema
+  - acao: Informe o e-mail
+    dado: usuario@dominio.com
+  - acao: Informe a senha
+    dado: senha123
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: O acesso ao sistema é realizado e a página principal é exibida.
+- id: CT-002
+  titulo: Bloqueio de conta após três tentativas com senha incorreta
+  tipo: falha
+  prioridade: alta
+  regra_coberta: Após três tentativas com senha incorreta, a conta é bloqueada por 15 minutos e exibe
+    a mensagem "Conta temporariamente bloqueada".
+  pre_condicoes:
+  - Usuário possui cadastro ativo no sistema.
+  passos:
+  - acao: Acesse a tela de login
+    dado: URL do sistema
+  - acao: Informe o e-mail
+    dado: usuario@dominio.com
+  - acao: Informe a senha incorreta na primeira tentativa
+    dado: senhaErrada1
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  - acao: Informe a senha incorreta na segunda tentativa
+    dado: senhaErrada2
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  - acao: Informe a senha incorreta na terceira tentativa
+    dado: senhaErrada3
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: A mensagem "Conta temporariamente bloqueada" é exibida na tela e a conta permanece
+    bloqueada por 15 minutos.
+- id: CT-003
+  titulo: Visualização de módulos para o perfil Operador
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: O perfil Operador vê somente o módulo Atendimento.
+  pre_condicoes:
+  - Usuário cadastrado com o perfil Operador.
+  passos:
+  - acao: Informe o e-mail do usuário Operador
+    dado: operador@dominio.com
+  - acao: Informe a senha
+    dado: senha123
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: Exibe apenas o módulo Atendimento na navegação do sistema.
+- id: CT-004
+  titulo: Visualização de módulos para o perfil Supervisor
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: O perfil Supervisor vê os módulos Atendimento e Relatórios.
+  pre_condicoes:
+  - Usuário cadastrado com o perfil Supervisor.
+  passos:
+  - acao: Informe o e-mail do usuário Supervisor
+    dado: supervisor@dominio.com
+  - acao: Informe a senha
+    dado: senha123
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: Exibe os módulos Atendimento e Relatórios na navegação do sistema.
+- id: CT-005
+  titulo: Visualização de módulos para o perfil Administrador
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: O perfil Administrador vê todos os módulos, incluindo Configurações.
+  pre_condicoes:
+  - Usuário cadastrado com o perfil Administrador.
+  passos:
+  - acao: Informe o e-mail do usuário Administrador
+    dado: admin@dominio.com
+  - acao: Informe a senha
+    dado: senha123
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: Exibe todos os módulos do sistema na navegação, incluindo o módulo Configurações.
+- id: CT-006
+  titulo: Tentativa de login com usuário inativo
+  tipo: falha
+  prioridade: alta
+  regra_coberta: Usuário inativo não consegue entrar e recebe a mensagem "Usuário inativo".
+  pre_condicoes:
+  - Usuário cadastrado no sistema com status inativo.
+  passos:
+  - acao: Informe o e-mail do usuário inativo
+    dado: inativo@dominio.com
+  - acao: Informe a senha
+    dado: senha123
+  - acao: Clique no botão Entrar
+    dado: Nenhum
+  resultado_esperado: O acesso é recusado e a mensagem "Usuário inativo" é exibida na tela.
+- id: CT-007
+  titulo: Expiração de sessão após 30 minutos de inatividade
+  tipo: alternativo
+  prioridade: media
+  regra_coberta: A sessão expira após 30 minutos sem interação e redireciona para a tela de login.
+  pre_condicoes:
+  - Usuário autenticado e logado no sistema.
+  passos:
+  - acao: Permaneça sem realizar qualquer interação no sistema
+    dado: 'Tempo: 30 minutos'
+  - acao: Execute qualquer ação no sistema após 30 minutos
+    dado: Clique em um item da tela
+  resultado_esperado: A sessão é encerrada e a aplicação redireciona automaticamente para a tela de login.

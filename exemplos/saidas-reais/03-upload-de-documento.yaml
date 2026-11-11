@@ -1,0 +1,147 @@
+# Saida real, sem edicao manual. Entrada: exemplos/03-upload-de-documento.md
+# Modelo: gemini-3.6-flash | Gerado em: 2026-11-11 | Auditoria: aprovado
+requisito: Upload de documentos em processos por servidores com restrições de formato, tamanho, quantidade
+  e situação do processo.
+regras_identificadas:
+- Só é possível anexar documento em processo com situação "Aberto".
+- São aceitos os formatos PDF, PNG e JPG, com até 20 MB por arquivo.
+- O sistema permite anexar até 10 arquivos por processo.
+- Cada anexo registra data, hora e a matrícula do servidor que anexou.
+- Ao tentar anexar o 11º arquivo, o sistema exibe "Limite de 10 anexos atingido".
+- Anexo em processo com situação "Arquivado" é bloqueado com a mensagem "Processo arquivado não aceita
+  novos anexos".
+casos:
+- id: CT-001
+  titulo: Anexar documento em processo com situação Aberto
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: Só é possível anexar documento em processo com situação "Aberto".
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto'
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione o arquivo para envio
+    dado: documento.pdf (1 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O arquivo documento.pdf é anexado com sucesso e exibido na lista de anexos do processo.
+- id: CT-002
+  titulo: Anexar arquivo no formato PNG com até 20 MB
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: São aceitos os formatos PDF, PNG e JPG, com até 20 MB por arquivo.
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto'
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione o arquivo para envio
+    dado: imagem.png (20 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O arquivo imagem.png é anexado com sucesso e exibido na lista de anexos do processo.
+- id: CT-003
+  titulo: Tentar anexar arquivo em formato não permitido
+  tipo: falha
+  prioridade: media
+  regra_coberta: São aceitos os formatos PDF, PNG e JPG, com até 20 MB por arquivo.
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto'
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione o arquivo para envio
+    dado: texto.txt (1 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O sistema impede o upload do arquivo texto.txt e não adiciona o arquivo à lista
+    de anexos.
+- id: CT-004
+  titulo: Tentar anexar arquivo com tamanho superior a 20 MB
+  tipo: falha
+  prioridade: media
+  regra_coberta: São aceitos os formatos PDF, PNG e JPG, com até 20 MB por arquivo.
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto'
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione o arquivo para envio
+    dado: documento_grande.pdf (20.1 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O sistema impede o upload do arquivo documento_grande.pdf e não adiciona o arquivo
+    à lista de anexos.
+- id: CT-005
+  titulo: Anexar até 10 arquivos em um mesmo processo
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: O sistema permite anexar até 10 arquivos por processo.
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto' e sem anexos
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione 10 arquivos válidos para envio
+    dado: doc1.pdf, doc2.pdf, ..., doc10.pdf (até 20 MB cada)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: Os 10 arquivos são anexados com sucesso e exibidos na lista de anexos do processo.
+- id: CT-006
+  titulo: Verificar registro de data, hora e matrícula do servidor ao anexar
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: Cada anexo registra data, hora e a matrícula do servidor que anexou.
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto'
+  - Usuário autenticado como servidor com a matrícula '123456'
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Aberto'
+  - acao: Selecione o arquivo para envio
+    dado: documento.jpg (2 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O anexo exibido na lista apresenta a data atual, a hora exata da realização do anexo
+    e a matrícula '123456'.
+- id: CT-007
+  titulo: Tentar anexar o 11º arquivo no processo
+  tipo: falha
+  prioridade: alta
+  regra_coberta: Ao tentar anexar o 11º arquivo, o sistema exibe "Limite de 10 anexos atingido".
+  pre_condicoes:
+  - Existe um processo com situação 'Aberto' contendo exatamente 10 arquivos anexados
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo com 10 anexos existentes
+  - acao: Selecione o arquivo para envio
+    dado: documento11.pdf (1 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O sistema exibe a mensagem "Limite de 10 anexos atingido" e não permite o anexo
+    do arquivo.
+- id: CT-008
+  titulo: Tentar anexar arquivo em processo com situação Arquivado
+  tipo: falha
+  prioridade: alta
+  regra_coberta: Anexo em processo com situação "Arquivado" é bloqueado com a mensagem "Processo arquivado
+    não aceita novos anexos".
+  pre_condicoes:
+  - Existe um processo com situação 'Arquivado'
+  - Usuário autenticado como servidor
+  passos:
+  - acao: Acesse a tela do processo
+    dado: Processo em situação 'Arquivado'
+  - acao: Selecione o arquivo para envio
+    dado: documento.pdf (1 MB)
+  - acao: Clique no botão Anexar
+    dado: ''
+  resultado_esperado: O sistema bloqueia a ação e exibe a mensagem "Processo arquivado não aceita novos
+    anexos".

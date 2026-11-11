@@ -1,0 +1,145 @@
+# Saida real, sem edicao manual. Entrada: exemplos/01-solicitacao-alvara.md
+# Modelo: gemini-3.6-flash | Gerado em: 2026-11-10 | Auditoria: aprovado
+requisito: Solicitação de alvará de funcionamento via portal por empreendedor autenticado
+regras_identificadas:
+- A solicitação só pode ser enviada por usuário autenticado com CNPJ ativo.
+- O formulário exige CNPJ, endereço do estabelecimento, atividade principal (CNAE) e o anexo do contrato
+  social em PDF de até 10 MB.
+- Se o CNPJ informado estiver com situação diferente de ativa na base da Receita, o sistema bloqueia o
+  envio e exibe a mensagem "CNPJ sem situação ativa".
+- Anexo em formato diferente de PDF é rejeitado com a mensagem "Apenas arquivos PDF são aceitos".
+- Anexo acima de 10 MB é rejeitado com a mensagem "Arquivo excede o limite de 10 MB".
+- Ao enviar com sucesso, o sistema gera um número de protocolo no formato AAAA-NNNNNN e exibe esse número
+  na tela de confirmação.
+- A solicitação enviada fica com situação "Em análise" na lista de solicitações do usuário.
+casos:
+- id: CT-001
+  titulo: Envio de solicitação com sucesso e exibição do número de protocolo
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: Ao enviar com sucesso, o sistema gera um número de protocolo no formato AAAA-NNNNNN e
+    exibe esse número na tela de confirmação.
+  pre_condicoes:
+  - Usuário autenticado com CNPJ ativo
+  passos:
+  - acao: Acesse o formulário de solicitação de alvará de funcionamento
+    dado: ''
+  - acao: Informe o CNPJ
+    dado: 12.345.678/0001-90
+  - acao: Informe o endereço do estabelecimento
+    dado: Rua Exemplo, 123
+  - acao: Informe a atividade principal (CNAE)
+    dado: 6201-5/00
+  - acao: Anexe o contrato social em PDF
+    dado: contrato.pdf (5 MB)
+  - acao: Clique em Enviar
+    dado: ''
+  resultado_esperado: O sistema exibe a tela de confirmação contendo o número de protocolo no formato
+    AAAA-NNNNNN.
+- id: CT-002
+  titulo: Impossibilidade de envio por usuário não autenticado ou sem CNPJ ativo
+  tipo: falha
+  prioridade: alta
+  regra_coberta: A solicitação só pode ser enviada por usuário autenticado com CNPJ ativo.
+  pre_condicoes:
+  - Usuário não autenticado
+  passos:
+  - acao: Acesse a URL do formulário de solicitação de alvará de funcionamento
+    dado: ''
+  resultado_esperado: O sistema bloqueia o acesso ao formulário e redireciona para a tela de autenticação.
+- id: CT-003
+  titulo: Tentativa de envio sem o preenchimento de campos obrigatórios
+  tipo: falha
+  prioridade: alta
+  regra_coberta: O formulário exige CNPJ, endereço do estabelecimento, atividade principal (CNAE) e o
+    anexo do contrato social em PDF de até 10 MB.
+  pre_condicoes:
+  - Usuário autenticado com CNPJ ativo
+  passos:
+  - acao: Acesse o formulário de solicitação de alvará de funcionamento
+    dado: ''
+  - acao: Deixe os campos CNPJ, endereço do estabelecimento, CNAE e anexo em branco
+    dado: ''
+  - acao: Clique em Enviar
+    dado: ''
+  resultado_esperado: O sistema bloqueia o envio da solicitação e indica a obrigatoriedade dos campos
+    CNPJ, endereço do estabelecimento, atividade principal (CNAE) e anexo do contrato social.
+- id: CT-004
+  titulo: Bloqueio de envio para CNPJ com situação inativa na Receita
+  tipo: falha
+  prioridade: alta
+  regra_coberta: Se o CNPJ informado estiver com situação diferente de ativa na base da Receita, o sistema
+    bloqueia o envio e exibe a mensagem "CNPJ sem situação ativa".
+  pre_condicoes:
+  - Usuário autenticado
+  passos:
+  - acao: Acesse o formulário de solicitação de alvará de funcionamento
+    dado: ''
+  - acao: Informe o CNPJ com situação inativa
+    dado: 98.765.432/0001-10
+  - acao: Informe o endereço do estabelecimento
+    dado: Avenida Teste, 456
+  - acao: Informe a atividade principal (CNAE)
+    dado: 4711-3/01
+  - acao: Anexe o contrato social em PDF
+    dado: contrato.pdf (2 MB)
+  - acao: Clique em Enviar
+    dado: ''
+  resultado_esperado: O sistema bloqueia o envio e exibe a mensagem "CNPJ sem situação ativa".
+- id: CT-005
+  titulo: Rejeição de arquivo anexado em formato diferente de PDF
+  tipo: falha
+  prioridade: media
+  regra_coberta: Anexo em formato diferente de PDF é rejeitado com a mensagem "Apenas arquivos PDF são
+    aceitos".
+  pre_condicoes:
+  - Usuário autenticado com CNPJ ativo
+  passos:
+  - acao: Acesse o formulário de solicitação de alvará de funcionamento
+    dado: ''
+  - acao: Informe o CNPJ
+    dado: 12.345.678/0001-90
+  - acao: Informe o endereço do estabelecimento
+    dado: Rua Exemplo, 123
+  - acao: Informe a atividade principal (CNAE)
+    dado: 6201-5/00
+  - acao: Anexe o contrato social em formato PNG
+    dado: contrato.png
+  - acao: Clique em Enviar
+    dado: ''
+  resultado_esperado: O sistema rejeita o arquivo e exibe a mensagem "Apenas arquivos PDF são aceitos".
+- id: CT-006
+  titulo: Rejeição de arquivo PDF com tamanho acima de 10 MB
+  tipo: falha
+  prioridade: media
+  regra_coberta: Anexo acima de 10 MB é rejeitado com a mensagem "Arquivo excede o limite de 10 MB".
+  pre_condicoes:
+  - Usuário autenticado com CNPJ ativo
+  passos:
+  - acao: Acesse o formulário de solicitação de alvará de funcionamento
+    dado: ''
+  - acao: Informe o CNPJ
+    dado: 12.345.678/0001-90
+  - acao: Informe o endereço do estabelecimento
+    dado: Rua Exemplo, 123
+  - acao: Informe a atividade principal (CNAE)
+    dado: 6201-5/00
+  - acao: Anexe o contrato social em PDF com tamanho de 11 MB
+    dado: contrato_grande.pdf (11 MB)
+  - acao: Clique em Enviar
+    dado: ''
+  resultado_esperado: O sistema rejeita o arquivo e exibe a mensagem "Arquivo excede o limite de 10 MB".
+- id: CT-007
+  titulo: Verificação da situação da solicitação enviada na lista do usuário
+  tipo: sucesso
+  prioridade: alta
+  regra_coberta: A solicitação enviada fica com situação "Em análise" na lista de solicitações do usuário.
+  pre_condicoes:
+  - Solicitação de alvará enviada com sucesso pelo usuário
+  passos:
+  - acao: Acesse a lista de solicitações do usuário
+    dado: ''
+  - acao: Localize a solicitação enviada recentemente
+    dado: ''
+  resultado_esperado: A solicitação apresenta a situação "Em análise" na coluna de situação da lista de
+    solicitações.

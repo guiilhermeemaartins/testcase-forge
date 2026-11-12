@@ -195,7 +195,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-37 testes, nenhum deles chama a API. O gerador é testado com um provider mockado,
+39 testes, nenhum deles chama a API. O gerador é testado com um provider mockado,
 inclusive o caminho em que **o modelo erra o formato na primeira tentativa e acerta
 na segunda** — porque esse caminho é o que acontece na prática e é o que eu mais
 precisava garantir.
@@ -212,7 +212,7 @@ forge/
 exemplos/        três critérios de aceite + a resposta fixa usada no modo mock
   saidas-reais/  as suítes que o modelo real gerou para os três critérios
   regra_extra.py exemplo de regra extra de auditoria
-tests/           37 testes, sem rede
+tests/           39 testes, sem rede
 ```
 
 ## Decisões que tomei de propósito

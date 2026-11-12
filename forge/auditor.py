@@ -32,8 +32,6 @@ TERMOS_VAGOS = [
     "com sucesso total",
 ]
 
-PADRAO_ID = re.compile(r"CT-\d{3}")
-
 
 class Achado:
     def __init__(self, severidade: str, regra: str, mensagem: str) -> None:
@@ -171,7 +169,8 @@ def auditar(suite: SuiteDeTestes, regras_extras: list[Regra] | None = None) -> R
     for dup in {t for t in titulos if titulos.count(t) > 1}:
         achados.append(Achado("aviso", "caso_duplicado", f"titulo repetido: {dup!r}"))
 
-    # 7. Passo acionavel: precisa de verbo, nao de descricao de estado.
+    # 7. Passo acionavel: uma palavra so nao descreve uma acao. A regra mede
+    # tamanho, nao gramatica: "Sistema exibe erro" passa, mesmo sendo estado.
     for c in suite.casos:
         for i, p in enumerate(c.passos, start=1):
             if len(p.acao.split()) < 2:

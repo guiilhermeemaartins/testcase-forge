@@ -1,6 +1,5 @@
 """Transforma um requisito em prosa numa suite de testes estruturada."""
 
-import json
 import re
 
 from pydantic import ValidationError

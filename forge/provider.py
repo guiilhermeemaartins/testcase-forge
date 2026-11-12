@@ -61,6 +61,13 @@ class GeminiProvider:
             ) from e
         except urllib.error.URLError as e:
             raise ErroDoProvider(f"Falha de rede ao chamar o provider: {e.reason}") from e
+        except TimeoutError as e:
+            # Timeout durante a leitura da resposta nao vem embrulhado em
+            # URLError. Sem este tratamento ele subia como erro generico e o
+            # programa saia com o mesmo codigo de "suite reprovada".
+            raise ErroDoProvider(
+                "Tempo esgotado esperando a resposta do provider. Tente de novo em instantes."
+            ) from e
 
         try:
             return dados["candidates"][0]["content"]["parts"][0]["text"]
